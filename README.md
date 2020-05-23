@@ -3,6 +3,10 @@
 Clean a capture file to make Zoom RTP flows look like standard ones.
 To do this, the tool decapsulates the RTP packets from the custom Zoom transport protocol.
 
+The information to create this tool is largely based from [this](https://citizenlab.ca/2020/04/move-fast-roll-your-own-crypto-a-quick-look-at-the-confidentiality-of-zoom-meetings/).
+
+The input can be PCAP or PCAPNG. The output is in PCAP format. The tool can read/write also from the standard input/output.
+
 Prerequisites: you need Python3 with the `dpkt` package installed.
 
 Usage: 
