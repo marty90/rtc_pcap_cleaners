@@ -19,13 +19,13 @@ TRIM_LEN_VIDEO = 21
 START_PROBE_LEN = 10
 
 # Print help
-if sys.argv[1] == '-h':
-    print('''Zoom Pcap Cleaner 1.0 -- Martino Trevisan
+if (len(sys.argv) == 2 and sys.argv[1] == '-h') or sys.stdin.isatty():
+    print('''\
+Zoom Pcap Cleaner 1.0 -- Martino Trevisan (martino.trevisan@polito.it)
 Clean a capture file to make Zoom RTP flows look like standard ones.
 Usage: zoom_pcap_cleaner [infile] [outfile]
     If outfile is omitted, print on the standard output.
-    If infile is omitted, read from the standard input.
-        ''')
+    If infile is omitted, read from the standard input.''')
     exit()
 
 # Get Args
