@@ -11,6 +11,8 @@ UDP_PORTS = {3478, 3479, 5090, 8801, 8802, 8803, 8804, 8805, 8806, 8807, 8808, 8
 # Source: https://citizenlab.ca/2020/04/move-fast-roll-your-own-crypto-a-quick-look-at-the-confidentiality-of-zoom-meetings/
 VIDEO_MAGIC = bytes.fromhex("05100100")
 AUDIO_MAGIC = bytes.fromhex("050f0100")
+OTHER_MAGIC = bytes.fromhex("050d")
+BEDE_MAGIC  = bytes.fromhex("bede")
 MAGIC_LEN = 4
 
 # Parameters
@@ -78,6 +80,11 @@ for ts, buf in pcap:
                 elif first_bytes == VIDEO_MAGIC:
                     zoom_type = "video"
                     trim = TRIM_LEN_VIDEO
+                else:
+                    # Identify some flows by the RTP extensions field
+                    if udp.data[:2] == OTHER_MAGIC and udp.data[39:41] == BEDE_MAGIC :
+                        zoom_type = "other"
+                        trim = 27
 
                 # It is zoom
                 if zoom_type is not None:
