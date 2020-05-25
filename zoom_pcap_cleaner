@@ -85,6 +85,9 @@ for ts, buf in pcap:
                     if udp.data[:2] == OTHER_MAGIC and udp.data[39:41] == BEDE_MAGIC :
                         zoom_type = "other"
                         trim = 27
+                    elif udp.data[:2] == OTHER_MAGIC and udp.data[43:45] == BEDE_MAGIC :
+                        zoom_type = "other"
+                        trim = 31
 
                 # It is zoom
                 if zoom_type is not None:
