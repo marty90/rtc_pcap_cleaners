@@ -5,10 +5,9 @@ import dpkt
 import sys
 import io
 
-UDP_PORTS = {1062}
+UDP_PORTS = set(range(1000,1100))
 
-XCLOUD_MAGIC = bytes.fromhex("2361")
-MAGIC_LEN = 2
+UDP_LEN = 15
 
 # Parameters
 TRIM = 2
@@ -64,30 +63,29 @@ for ts, buf in pcap:
             udp = ip.data
 
             # Check ports
-            if udp.sport in UDP_PORTS or udp.dport in UDP_PORTS and type(udp.data) == bytes:
+            if (  udp.sport in UDP_PORTS or udp.dport in UDP_PORTS ) and type(udp.data) == bytes:
 
                 # Check Magic
-                first_bytes = udp.data[:MAGIC_LEN]
-                xcloud_type = None
-                if first_bytes == XCLOUD_MAGIC:
-                    xcloud_type = "xcloud"
-                    trim = TRIM
+                tup = (ip.src, ip.dst, udp.sport, udp.dport)
+                tup_rev = (ip.dst, ip.src, udp.dport, udp.sport)
 
-                # It is xcloud
-                if xcloud_type is not None:
-                    tup = (ip.src, ip.dst, udp.sport, udp.dport, xcloud_type)
-                    xcloud_pkt += 1
+                # Check xCloud flow
+                if udp.ulen == 15 and udp.data[0:3] == bytes.fromhex("000000") and udp.data[5:7] == bytes.fromhex("0000"):
 
-                    # Check if in set
                     if not tup in xcloud_streams:
-                        print ("xCloud {} flow detected: {}:{} -> {}:{}".format(
-                            xcloud_type, inet_to_str(ip.src), udp.sport, inet_to_str(ip.dst), udp.dport),
+                        print ("xCloud flow detected: {}:{} -> {}:{}".format(
+                               inet_to_str(ip.src), udp.sport, inet_to_str(ip.dst), udp.dport),
                             file = sys.stderr)
                         xcloud_streams.add(tup)
 
+                # It is xCloud
+                if  ( tup in xcloud_streams or tup_rev in xcloud_streams ) and \
+                    ( udp.data[2:3] ==  bytes.fromhex("80")  or udp.data[2:3] ==  bytes.fromhex("90")):
+                    xcloud_pkt += 1
+
                     # Shorten data
-                    udp.ulen -= trim
-                    new_data = udp.data[trim:]
+                    udp.ulen -= TRIM
+                    new_data = udp.data[TRIM:]
                     udp.data = bytes(new_data)
 
     tot_pkt += 1
